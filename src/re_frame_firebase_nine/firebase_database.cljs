@@ -44,6 +44,16 @@
      (fb-set! ref data then-callback catch-callback)
      (.-key ref))))
 
+
+;; Writes multiple values to the Database at once.
+;; The values argument contains multiple property-value pairs that will be written to the Database together.
+(defn update!
+  ([path set-map] (update! path set-map (fn []) (fn [_])))
+  ([path set-map then-callback catch-callback]
+   (-> (fdb/update (db-ref (get-db) path) (clj->js set-map))
+       (.then then-callback)
+       (.catch catch-callback))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -77,6 +87,12 @@
               #(println "SUCCESS") #(println "ERRROR" (js->clj %)))
 
   (push-value! ["users" (get-current-user-uid) "collections"] "test3")
+
+  (set-value! ["users" (get-current-user-uid) "name"] "my name")
+  (update! ["users" (get-current-user-uid)]
+           {"/available/0" nil
+            "/group-with/0" "99"}
+           #(println "SUCCESS") #(println "ERRROR" (js->clj %)))
       ;
   )
 

@@ -1,10 +1,12 @@
 (ns re-frame-firebase-nine.fb-reframe
   (:require [re-frame.core :as re-frame]
-            [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value!]]
+            [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value! update!]]
             [reagent.ratom :as ratom]
             [re-frame.utils :refer [dissoc-in]]
-            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user]]
-            [re-frame-firebase-nine.firebase-app :refer [init-app]]))
+            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user get-auth]]
+            [re-frame-firebase-nine.firebase-app :refer [init-app]]
+            [clojure.spec.alpha :as spec]
+            [clojure.test :refer [is]]))
 
 ;; Effect for setting a value in firebase. Optional :success and :error keys for handlers
 ;; Data can be deleted by giving null as value
@@ -15,6 +17,19 @@
                data
                (if success success default-set-success-callback)
                (if error error default-set-error-callback))))
+
+
+;; Effect for updating multiple values in firebase. Optional :success and :error keys for handlers
+;; path is the starting db ref node
+;; path-data-map is a map of path and values
+(re-frame/reg-fx
+ ::firebase-update
+ (fn [{:keys [path path-data-map success error]}]
+   (update! path
+            path-data-map
+            (if success success default-set-success-callback)
+            (if error error default-set-error-callback))))
+
 
 ;; the key will be stored in the db at key-path
 (re-frame/reg-fx
@@ -64,9 +79,11 @@
   (reset! temp-path-atom new-path))
 
 (defn fb-reframe-config
-  [{:keys [temp-path firebase-config]}]
-  (set-temp-path! temp-path)
-  (init-app firebase-config))
+  [config]
+  {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
+  (set-temp-path! (:temp-path config))
+  (when-not (nil? (:firebase-config config)) (init-app (:firebase-config config)))
+  (get-auth))
 
 ;;
 ;; Utility functions for transforming lists to maps
@@ -125,3 +142,16 @@
   []
   (firebase-auth/set-browser-session-persistence))
 
+(comment
+  (re-frame/reg-event-fx
+   ::update-test
+   (fn []
+     {::firebase-update {:path ["users" (get-current-user-uid)]
+                         :path-data-map {"/available/2" true
+                                         "/group-with/2" "66"}}}))
+  (re-frame/dispatch [::update-test])
+  (println (clj->js {:id "1"
+                     :age 50
+                     :map {:a "3" :b 4}}))
+ ;
+  )

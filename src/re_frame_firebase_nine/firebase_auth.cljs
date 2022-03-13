@@ -1,12 +1,18 @@
 (ns re-frame-firebase-nine.firebase-auth
   (:require ["firebase/auth" :as firebase-auth]
             [re-frame-firebase-nine.firebase-app :refer [firebase-app init-error-msg]]))
+;;
+;; Initialize firebase auth once and store the auth in the atom
+;;
+(defonce firebase-authentication (atom nil))
 
 (defn get-auth
   []
-  (if-not @firebase-app
-    (throw (js/Error. init-error-msg))
-    (firebase-auth/getAuth)))
+  (if-not @firebase-authentication
+    (if-not @firebase-app
+      (throw (js/Error. init-error-msg))
+      (reset! firebase-authentication (firebase-auth/getAuth)))
+    @firebase-authentication))
 
 (defn create-user
   [email password then-callback catch-callback]
