@@ -97,12 +97,26 @@
    (if (empty? list) {}
        (assoc (vector->map (rest list) (inc n)) (keyword (str n)) (first list)))))
 
-(defn- if-vector->map
+;; 10 times faster
+(defn apply-fn-tovalues [f m]
+  (reduce-kv (fn [m k v] (assoc m k (f v)))
+             {} m))
+
+;; (defn- apply-fn-tovalues
+;;   [function a-map]
+;;   (if (= {} a-map)
+;;     a-map
+;;     (apply merge (map
+;;                   (fn [[key value]] {key (function value)})
+;;                   (seq a-map)))))
+
+(defn if-vector?->map
   [value]
-  ;; (println "if-vector->map" value (and @turn-lists-to-maps-atom? (vector? value) (vector->map value)))
-  (if (vector? value)
-    (vector->map value)
-    value))
+  (cond
+    (vector? value) (vector->map value)
+    (map? value) (apply-fn-tovalues if-vector?->map value)
+    :else value))
+
 
 (comment
   (vector->map [true nil true true])
@@ -114,7 +128,7 @@
  ::on-value
  (fn [app-db [_ path]]
    (let [query-token (on-value path
-                               #(re-frame/dispatch [::fb-write-to-temp path (if-vector->map %)]))]
+                               #(re-frame/dispatch [::fb-write-to-temp path (if-vector?->map %)]))]
      (ratom/make-reaction
       (fn [] (get-in @app-db (concat @temp-path-atom path)))
       :on-dispose #(do (off path query-token)
