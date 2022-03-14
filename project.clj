@@ -1,4 +1,4 @@
-(defproject org.clojars.dranidis/re-frame-firebase-nine "0.1.3-SNAPSHOT"
+(defproject org.clojars.dranidis/re-frame-firebase-nine "0.1.4-SNAPSHOT"
   :description "A re-frame library for connecting to firebase 9"
   :url "https://github.com/dranidis/re-frame-firebase-nine"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
