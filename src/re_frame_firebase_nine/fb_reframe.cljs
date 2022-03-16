@@ -7,7 +7,8 @@
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [clojure.spec.alpha :as spec]
             [clojure.test :refer [is]]
-            [re-frame-firebase-nine.utils :refer [if-vector?->map]]))
+            [re-frame-firebase-nine.utils :refer [if-vector?->map]]
+            [clojure.string :as string]))
 
 ;; Effect for setting a value in firebase. Optional :success and :error keys for handlers
 ;; Data can be deleted by giving null as value
@@ -22,12 +23,14 @@
 
 ;; Effect for updating multiple values in firebase. Optional :success and :error keys for handlers
 ;; path is the starting db ref node
-;; path-data-map is a map of path and values
+;; path-data-map is a map of path (list of) and values
 (re-frame/reg-fx
  ::firebase-update
  (fn [{:keys [path path-data-map success error]}]
    (update! path
-            path-data-map
+            (->> path-data-map
+                 (map (fn [[k v]] [(str "/" (string/join "/" k)) v]))
+                 (into {}))
             (if success success default-set-success-callback)
             (if error error default-set-error-callback))))
 
@@ -120,15 +123,29 @@
   (firebase-auth/set-browser-session-persistence))
 
 (comment
+  (get-current-user-uid)
+
   (re-frame/reg-event-fx
    ::update-test
    (fn []
      {::firebase-update {:path ["users" (get-current-user-uid)]
-                         :path-data-map {"/available/2" true
-                                         "/group-with/2" "66"}}}))
+                         :path-data-map {["available" "4"] true
+                                         ["group-with" "1"] "666"}}}))
+  ;; ... and then dispatch it!
   (re-frame/dispatch [::update-test])
   (println (clj->js {:id "1"
                      :age 50
                      :map {:a "3" :b 4}}))
+
+  ;; (require '(clojure.string :as string))
+  (string/join "/" ["a" "b"])
+
+  (->> {["a" "b"] true}
+       (map (fn [[k v]] [(str "/" (string/join "/" k)) v]))
+       (into {}))
+
+  (->> {:a {:name "name"} :b {:name "Name1"}}
+       (into [])
+       (map (fn [[k v]] {:id (name k) :name (:name v)})))
  ;
   )
