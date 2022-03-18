@@ -84,6 +84,10 @@
 
 (defn fb-reframe-config
   [config]
+  "Configures the path for the temp storage and initializes firebase app with
+   the provided key.
+   \n - :temp-path string
+   \n - :firebase-config map"
   {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
   (set-temp-path! (:temp-path config))
   (when-not (nil? (:firebase-config config)) (init-app (:firebase-config config)))
@@ -147,5 +151,7 @@
   (->> {:a {:name "name"} :b {:name "Name1"}}
        (into [])
        (map (fn [[k v]] {:id (name k) :name (:name v)})))
+
+  fb-reframe-config
  ;
   )
