@@ -3,7 +3,7 @@
             [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value! update!]]
             [reagent.ratom :as ratom]
             [re-frame.utils :refer [dissoc-in]]
-            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user get-auth]]
+            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user get-auth on-auth-state-changed]]
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [clojure.spec.alpha :as spec]
             [clojure.test :refer [is]]
@@ -84,11 +84,11 @@
 
 (defn fb-reframe-config
   [config]
+  {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
   "Configures the path for the temp storage and initializes firebase app with
    the provided key.
    \n - :temp-path string
    \n - :firebase-config map"
-  {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
   (set-temp-path! (:temp-path config))
   (when-not (nil? (:firebase-config config)) (init-app (:firebase-config config)))
   (get-auth))
@@ -116,6 +116,15 @@
  ::cleanup-temp
  (fn [db [_ path]]
    (dissoc-in db (concat @temp-path-atom path))))
+
+
+(re-frame/reg-sub-raw
+ ::on-auth-state-changed
+ (fn [app-db [_]]
+   (let [_ (on-auth-state-changed
+            #(re-frame/dispatch [::fb-write-to-temp [:uid] (js->clj (.-uid %))]))]
+     (ratom/make-reaction
+      (fn [] (get-in @app-db (concat @temp-path-atom [:uid])))))))
 
 
 (def get-current-user firebase-auth/get-current-user)
