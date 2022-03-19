@@ -5,9 +5,15 @@
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [re-frame-firebase-nine.firebase-auth :refer [get-current-user-uid]]))
 
-(defn- get-db
+;; (defn- get-db
+;;   []
+;;   (fdb/getDatabase (init-app)))
+
+(defn get-db
   []
-  (fdb/getDatabase (init-app)))
+  (fdb/getDatabase))
+
+(def connect-database-emulator fdb/connectDatabaseEmulator)
 
 (defn- db-ref
   [db path]
@@ -83,6 +89,9 @@
   (console :error (js->clj error)))
 
 (comment
+  (set-value! ["users"] "test"
+              #(println "SUCCESS") #(println "ERRROR" (js->clj %)))
+
   (set-value! ["users" (get-current-user-uid) "games" "2" "available"] false
               #(println "SUCCESS") #(println "ERRROR" (js->clj %)))
 

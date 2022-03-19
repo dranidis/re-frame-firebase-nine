@@ -1,14 +1,26 @@
 (ns re-frame-firebase-nine.fb-reframe
   (:require [re-frame.core :as re-frame]
-            [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value! update!]]
+            [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value! update! connect-database-emulator get-db]]
             [reagent.ratom :as ratom]
             [re-frame.utils :refer [dissoc-in]]
-            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user get-auth on-auth-state-changed]]
+            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user on-auth-state-changed user-callback connect-auth-emulator get-auth]]
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [clojure.spec.alpha :as spec]
             [clojure.test :refer [is]]
             [re-frame-firebase-nine.utils :refer [if-vector?->map]]
             [clojure.string :as string]))
+
+
+
+;; Connect to emulator
+;;
+(defn connect-emulator
+  "Connects to db and auth emulators when location is localhost"
+  []
+  (when (= "localhost" (.-hostname js/location))
+    (connect-database-emulator (get-db) "localhost" 9000)
+    (connect-auth-emulator (get-auth) "http://localhost:9099")))
+
 
 ;; Effect for setting a value in firebase. Optional :success and :error keys for handlers
 ;; Data can be deleted by giving null as value
@@ -55,23 +67,29 @@
 
 (re-frame/reg-fx
  ::firebase-create-user
- (fn [{:keys [email password success]}]
+ (fn [{:keys [email password success error]}]
    (create-user email password
                 #(re-frame/dispatch [success %])
-                error-callback)))
+                (if error
+                  #(re-frame/dispatch [error %])
+                  error-callback))))
 
 (re-frame/reg-fx
  ::firebase-sign-in
- (fn [{:keys [email password success]}]
+ (fn [{:keys [email password success error]}]
    (sign-in email password
             #(re-frame/dispatch [success %])
-            error-callback)))
+            (if error
+              #(re-frame/dispatch [error %])
+              error-callback))))
 
 (re-frame/reg-fx
  ::firebase-sign-out
- (fn [{:keys [success]}]
+ (fn [{:keys [success error]}]
    (sign-out #(re-frame/dispatch [success %])
-             error-callback)))
+             (if error
+               #(re-frame/dispatch [error %])
+               error-callback))))
 
 ;;
 ;; Settings for FB and reframe
@@ -91,7 +109,8 @@
    \n - :firebase-config map"
   (set-temp-path! (:temp-path config))
   (when-not (nil? (:firebase-config config)) (init-app (:firebase-config config)))
-  (get-auth))
+  ;; (get-auth)
+  )
 
 
 (re-frame/reg-sub-raw
@@ -122,7 +141,9 @@
  ::on-auth-state-changed
  (fn [app-db [_]]
    (let [_ (on-auth-state-changed
-            #(re-frame/dispatch [::fb-write-to-temp [:uid] (js->clj (.-uid %))]))]
+            #(re-frame/dispatch [::fb-write-to-temp [:uid] (if %
+                                                             (js->clj (.-uid %))
+                                                             nil)]))]
      (ratom/make-reaction
       (fn [] (get-in @app-db (concat @temp-path-atom [:uid])))))))
 
@@ -136,6 +157,42 @@
   (firebase-auth/set-browser-session-persistence))
 
 (comment
+  (re-frame/reg-event-db
+   ::initialize-db
+   (fn [_ _] {}))
+
+  (re-frame/reg-event-db
+   ::db
+   (fn [db _] db))
+
+  (re-frame/dispatch [::initialize-db])
+
+  (re-frame/reg-sub
+   ::uid
+   :<- [::on-auth-state-changed]
+   :<- [::db]
+   (fn [uid db [_]]
+     (assoc db :uid uid)))
+
+  (fb-reframe-config {:temp-path [:firebase-temp-storage]
+                      :firebase-config {:apiKey "AIzaSyCLH4BlNSOfTrMlB_90Hsxg5cr3bn3p-7E",
+                                        :authDomain "help-me-pick-what-to-play.firebaseapp.com",
+                                        :databaseURL "https://help-me-pick-what-to-play-default-rtdb.europe-west1.firebasedatabase.app",
+                                        :projectId "help-me-pick-what-to-play",
+                                        :storageBucket "help-me-pick-what-to-play.appspot.com",
+                                        :messagingSenderId "780911312465",
+                                        :appId "1:780911312465:web:bbd9007195b3c630910270"}})
+
+  (def uid (re-frame/subscribe [::uid]))
+  (deref uid)
+
+
+  (def auth-changed (re-frame/subscribe [::on-auth-state-changed]))
+  @auth-changed
+  (sign-in "dranidis@gmail.com" "password" user-callback error-callback)
+  (sign-out)
+
+
   (get-current-user-uid)
 
   (re-frame/reg-event-fx

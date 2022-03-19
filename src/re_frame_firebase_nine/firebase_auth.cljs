@@ -14,6 +14,8 @@
       (reset! firebase-authentication (firebase-auth/getAuth)))
     @firebase-authentication))
 
+(def connect-auth-emulator firebase-auth/connectAuthEmulator)
+
 (defn create-user
   [email password then-callback catch-callback]
   (-> (firebase-auth/createUserWithEmailAndPassword (get-auth) email password)
