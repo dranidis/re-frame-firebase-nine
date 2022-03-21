@@ -1,4 +1,4 @@
-(ns re-frame-firebase-nine.example.emulator)
+(ns re-frame-firebase-nine.example.fb-config)
 
 (defn get-config
   []

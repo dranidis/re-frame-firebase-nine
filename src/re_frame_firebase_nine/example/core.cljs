@@ -5,7 +5,7 @@
    [re-frame-firebase-nine.example.events :as events]
    [re-frame-firebase-nine.example.views :as views]
    [re-frame-firebase-nine.example.config :as config]
-   [re-frame-firebase-nine.example.emulator :refer [get-config]]
+   [re-frame-firebase-nine.example.fb-config :refer [get-config]]
    [re-frame-firebase-nine.fb-reframe :refer [fb-reframe-config connect-emulator]]))
 
 
@@ -23,7 +23,7 @@
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
 
-  (fb-reframe-config {:temp-path ["temp"]
+  (fb-reframe-config {:temp-path ["re-frame-firebase-nine-temp"]
                       :firebase-config (get-config)})
   (connect-emulator)
 

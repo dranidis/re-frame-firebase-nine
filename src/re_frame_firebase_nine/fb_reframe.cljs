@@ -101,17 +101,27 @@
   (reset! temp-path-atom new-path))
 
 (defn fb-reframe-config
+  "Configures the path for the temp storage and initializes firebase app with
+   the provided key. Map keys:
+   \n - :temp-path vector of strings
+   \n - :firebase-config map"
   [config]
   {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
-  "Configures the path for the temp storage and initializes firebase app with
-   the provided key.
-   \n - :temp-path string
-   \n - :firebase-config map"
   (set-temp-path! (:temp-path config))
   (when-not (nil? (:firebase-config config)) (init-app (:firebase-config config)))
   ;; (get-auth)
   )
 
+
+;; effect for reading once
+(defn on-value-once-handler
+  [{:keys [path success] :as config}]
+  {:pre [(is (spec/valid? (spec/keys :req-un [::path ::success]) config))]}
+  (on-value path #(re-frame/dispatch [success %]) true))
+
+(re-frame/reg-fx
+ ::on-value-once
+ on-value-once-handler)
 
 (re-frame/reg-sub-raw
  ::on-value
