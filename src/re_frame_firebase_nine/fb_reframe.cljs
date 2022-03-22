@@ -11,15 +11,17 @@
             [clojure.string :as string]))
 
 
+(def connected-to-emalator? (atom false))
 
 ;; Connect to emulator
 ;;
 (defn connect-emulator
   "Connects to db and auth emulators when location is localhost"
   []
-  (when (= "localhost" (.-hostname js/location))
+  (when (and (not @connected-to-emalator?) (= "localhost" (.-hostname js/location)))
     (connect-database-emulator (get-db) "localhost" 9000)
-    (connect-auth-emulator (get-auth) "http://localhost:9099")))
+    (connect-auth-emulator (get-auth) "http://localhost:9099")
+    (reset! connected-to-emalator? true)))
 
 
 ;; Effect for setting a value in firebase. Optional :success and :error keys for handlers
@@ -40,9 +42,7 @@
  ::firebase-update
  (fn [{:keys [path path-data-map success error]}]
    (update! path
-            (->> path-data-map
-                 (map (fn [[k v]] [(str "/" (string/join "/" k)) v]))
-                 (into {}))
+            path-data-map
             (if success success default-set-success-callback)
             (if error error default-set-error-callback))))
 
@@ -103,10 +103,9 @@
   (reset! temp-path-atom new-path))
 
 (defn fb-reframe-config
-  "Configures the path for the temp storage and initializes firebase app with
-   the provided key. Map keys:
-   \n - :temp-path vector of strings
-   \n - :firebase-config map"
+  "Configures the path for the temp storage and initializes firebase app with the provided key. Map keys:
+   \n:temp-path vector of strings
+   \n:firebase-config map"
   [config]
   {:pre [(is (spec/valid? (spec/keys :req-un [::temp-path ::firebase-config]) config))]}
   (set-temp-path! (:temp-path config))

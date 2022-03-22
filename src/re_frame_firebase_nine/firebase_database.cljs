@@ -56,7 +56,10 @@
 (defn update!
   ([path set-map] (update! path set-map (fn []) (fn [_])))
   ([path set-map then-callback catch-callback]
-   (-> (fdb/update (fb-ref (get-db) path) (clj->js set-map))
+   (-> (fdb/update (fb-ref (get-db) path)
+                   (clj->js (->> set-map
+                                 (map (fn [[k v]] [(str "/" (string/join "/" k)) v]))
+                                 (into {}))))
        (.then then-callback)
        (.catch catch-callback))))
 
@@ -87,9 +90,5 @@
 (defn default-set-error-callback
   [error]
   (console :error (js->clj error)))
-
-
-
-
 
 

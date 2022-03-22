@@ -7,21 +7,15 @@
             [re-frame-firebase-nine.example.events :as events]
             [re-frame.core :as re-frame]
             [re-frame-firebase-nine.example.forms.forms :refer [db-set-value!]]
-            [re-frame-firebase-nine.firebase-database :refer [get-db fb-ref fb-set!]]))
+            [re-frame-firebase-nine.emulator :refer [connect-fb-emulator-empty-db]]))
 
-(defn connect-fb-emulator
-  []
-  (fb-reframe-config {:temp-path [:firebase-temp-storage]
-                      :firebase-config (get-config)})
 
-  (connect-emulator)
-  (fb-set! (fb-ref (get-db)) nil))
 
-(deftest test-save-todo
-  (testing "save-fetch-save-read-todo"
+(deftest test-create-todo
+  (testing "save-read-todo"
     (rf-test/run-test-async
      (let [_ (re-frame/subscribe [::subs/db])
-           _ (connect-fb-emulator)
+           _ (connect-fb-emulator-empty-db)
            _ (re-frame/dispatch-sync [::events/initialize-db])
            task "Test task"
            _ (db-set-value! [:form :todo] task)
