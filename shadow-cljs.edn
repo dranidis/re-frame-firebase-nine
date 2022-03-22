@@ -8,7 +8,8 @@
   [day8.re-frame/tracing "0.6.2"]
 
   [binaryage/devtools "1.0.4"]
-  [day8.re-frame/re-frame-10x "1.2.2"]]
+  [day8.re-frame/re-frame-10x "1.2.2"]
+  [day8.re-frame/test "0.1.5"]]
 
  :http {:port 9631}
 

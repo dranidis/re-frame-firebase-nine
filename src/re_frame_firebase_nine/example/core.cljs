@@ -23,8 +23,11 @@
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
 
-  (fb-reframe-config {:temp-path ["re-frame-firebase-nine-temp"]
+  (fb-reframe-config {:temp-path [:re-frame-firebase-nine-temp]
                       :firebase-config (get-config)})
   (connect-emulator)
 
   (mount-root))
+
+(comment
+  init)

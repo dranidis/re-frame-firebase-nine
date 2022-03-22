@@ -24,13 +24,18 @@
   (throw (js/Error. (str "No dispatch method for form input element of type: " type " for path: " path))))
 
 (defmethod dispatch :text [_ path value]
-  (re-frame/dispatch [::events/set-value! path value]))
+  (re-frame/dispatch [::events/set-value! path value])
+  (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true]))
 
 (defmethod dispatch :password [_ path value]
-  (re-frame/dispatch [::events/set-value! path value]))
+  (re-frame/dispatch [::events/set-value! path value])
+  (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true]))
+
 
 (defmethod dispatch :checkbox [_ path _]
-  (re-frame/dispatch [::events/update-value! path not]))
+  (re-frame/dispatch [::events/update-value! path not])
+  (re-frame/dispatch [::events/update-value! (into [:form-changed-value] path) not]))
+
 
 (defmulti input-element (fn [{:keys [type]}] type))
 
