@@ -51,17 +51,19 @@
 (re-frame/reg-fx
  ::firebase-push
  (fn [{:keys [path data success error key-path]}]
-   (println "key-path" key-path)
+  ;;  (println "key-path" key-path)
    (let [key (push-value! path
                           data
-                          (if success success default-set-success-callback)
-                          (if error error default-set-error-callback))]
+                          #(re-frame/dispatch [success])
+                          (if error
+                            #(re-frame/dispatch [error %])
+                            error-callback))]
      (re-frame/dispatch [::write-to-db key-path key]))))
 
 (re-frame/reg-event-db
  ::write-to-db
  (fn [db [_ path data]]
-   (println "path" path)
+  ;;  (println "path" path)
    (assoc-in db path data)))
 
 
@@ -167,43 +169,6 @@
   (firebase-auth/set-browser-session-persistence))
 
 (comment
-  (re-frame/reg-event-db
-   ::initialize-db
-   (fn [_ _] {}))
-
-  (re-frame/reg-event-db
-   ::db
-   (fn [db _] db))
-
-  (re-frame/dispatch [::initialize-db])
-
-  (re-frame/reg-sub
-   ::uid
-   :<- [::on-auth-state-changed]
-   :<- [::db]
-   (fn [uid db [_]]
-     (assoc db :uid uid)))
-
-  (fb-reframe-config {:temp-path [:firebase-temp-storage]
-                      :firebase-config {:apiKey "AIzaSyCLH4BlNSOfTrMlB_90Hsxg5cr3bn3p-7E",
-                                        :authDomain "help-me-pick-what-to-play.firebaseapp.com",
-                                        :databaseURL "https://help-me-pick-what-to-play-default-rtdb.europe-west1.firebasedatabase.app",
-                                        :projectId "help-me-pick-what-to-play",
-                                        :storageBucket "help-me-pick-what-to-play.appspot.com",
-                                        :messagingSenderId "780911312465",
-                                        :appId "1:780911312465:web:bbd9007195b3c630910270"}})
-
-  (def uid (re-frame/subscribe [::uid]))
-  (deref uid)
-
-
-  (def auth-changed (re-frame/subscribe [::on-auth-state-changed]))
-  @auth-changed
-  (sign-in "dranidis@gmail.com" "password" user-callback error-callback)
-  (sign-out)
-
-
-  (get-current-user-uid)
 
   (re-frame/reg-event-fx
    ::update-test
@@ -217,17 +182,6 @@
                      :age 50
                      :map {:a "3" :b 4}}))
 
-  ;; (require '(clojure.string :as string))
-  (string/join "/" ["a" "b"])
 
-  (->> {["a" "b"] true}
-       (map (fn [[k v]] [(str "/" (string/join "/" k)) v]))
-       (into {}))
-
-  (->> {:a {:name "name"} :b {:name "Name1"}}
-       (into [])
-       (map (fn [[k v]] {:id (name k) :name (:name v)})))
-
-  fb-reframe-config
- ;
+;
   )
