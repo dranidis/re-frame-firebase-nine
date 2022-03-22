@@ -52,15 +52,6 @@
     [:input.checkbox {:type (name type) :checked (if (nil? checked) false checked)
                       :on-change #(dispatch type path (post-fn (-> % .-target .-value)))}]))
 
-(defn input
-  [{:keys [label type path post-fn] :as params}]
-  {:pre [(is (spec/valid?
-              (spec/keys :req-un [label type path]) params))]}
-  (let [post-fn (if-nil?->value post-fn identity)]
-    [:div
-     [:label label]
-     [input-element {:type type :path path :post-fn post-fn}]]))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn string-list->map-list
   [options]

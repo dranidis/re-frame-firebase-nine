@@ -9,29 +9,38 @@
 
 
 (defn todo-item [todo]
-  (let [id (:id todo)]
+  (let [id (:id todo)
+        path [:form :todo-map (keyword id)]]
     [:div {:key (random-uuid)}
      [input-element {:class ""
                      :type :checkbox
                      :placeholder "Completed"
-                     :path [:form :todo-map (keyword id) :completed]}]
+                     :path (into path [:completed])}]
      [input-element {:class ""
                      :type :text
                      :placeholder "I have to do ..."
-                     :path [:form :todo-map (keyword id) :todo]}]
-     [:button {:on-click #(re-frame/dispatch [::events/save-todo [:form :todo-map (keyword id)]])
-               :disabled (not @(re-frame/subscribe [::form-subs/changed-value [:form :todo-map (keyword id)]]))} "Save"]]))
+                     :path (into path [:todo])}]
+     [:button {:on-click #(re-frame/dispatch [::events/save-todo path])
+               :disabled (not @(re-frame/subscribe [::form-subs/changed-value path]))} "Save"]]))
+
+(defn create-item
+  []
+  (let [path [:form :todo]]
+    [:div
+     [:h1 "New todo item"]
+     [input-element {:class ""
+                     :type :text
+                     :placeholder "I have to do ..."
+                     :path path}]
+     [:button {:on-click #(re-frame/dispatch [::events/create-todo path])} "Create"]]))
 
 (defn main-panel []
   [:div
    [:h1 "Current user email:" (get-current-user-email)]
 
-   [:h1 "New todo item"]
-   [input-element {:class ""
-                   :type :text
-                   :placeholder "I have to do ..."
-                   :path [:form :todo]}]
-   [:button {:on-click #(re-frame/dispatch [::events/create-todo [:form :todo]])} "Create"]
+   [create-item]
+
    [:h1 "Todos"]
    [:div
     (doall (map todo-item @(re-frame/subscribe [::subs/form-todo-map])))]])
+
