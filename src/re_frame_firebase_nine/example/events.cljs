@@ -13,10 +13,10 @@
 (re-frame/reg-event-fx
  ::create-todo
  (fn-traced
-  [{:keys [db]} [_ path]]
-  {:db (assoc-in db path "")
+  [{:keys [db]} [_ task]]
+  {
    ::fb-reframe/firebase-push {:path ["todos"]
-                               :data {:todo (get-in db path)}
+                               :data task
                                :success ::create-todo-success
                                :key-path [:current-todo-key]}}))
 
@@ -27,7 +27,18 @@
   {:db (assoc-in db path "")
    ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
                               :data  (get-in db path)
-                              :success (fn [] 
+                              :success (fn []
+                                        ;;  (.alert js/window "Saved")
+                                         (re-frame/dispatch [::save-todo-success]))}}))
+
+(re-frame/reg-event-fx
+ ::update-todo
+ (fn-traced
+  [{:keys [db]} [_ path]]
+  {:db (assoc-in db path "")
+   ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
+                              :data  (get-in db path)
+                              :success (fn []
                                         ;;  (.alert js/window "Saved")
                                          (re-frame/dispatch [::save-todo-success]))}}))
 

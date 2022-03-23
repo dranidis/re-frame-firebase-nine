@@ -16,9 +16,9 @@
    (re-frame/subscribe [::fb-reframe/on-value ["todos"]]))
  (fn [todos]
    (console :debug (str "::todos => " todos))
-  ;;  (reduce-kv (fn [m k v] (assoc m k (assoc v :id k))) {} todos)
+   (reduce-kv (fn [m k v] (assoc m k (assoc v :id k))) {} todos)
    ;; important change: remove (name k)
-   (reduce-kv (fn [m k v] (assoc m k (assoc v :id (name k)))) {} todos)
+  ;;  (reduce-kv (fn [m k v] (assoc m k (assoc v :id (name k)))) {} todos)
    ))
 
 (re-frame/reg-sub

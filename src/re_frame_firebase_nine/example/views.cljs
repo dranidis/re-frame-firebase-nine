@@ -3,7 +3,7 @@
    [re-frame.core :as re-frame]
    [re-frame-firebase-nine.example.subs :as subs]
    [re-frame-firebase-nine.example.events :as events]
-   [re-frame-firebase-nine.example.forms.forms :refer [input-element]]
+   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref]]
    [re-frame-firebase-nine.example.forms.subs :as form-subs]
    [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]))
 
@@ -32,7 +32,7 @@
                      :type :text
                      :placeholder "I have to do ..."
                      :path path}]
-     [:button {:on-click #(re-frame/dispatch [::events/create-todo path])} "Create"]]))
+     [:button {:on-click #(re-frame/dispatch [::events/create-todo {:todo @(db-get-ref path)}])} "Create"]]))
 
 (defn main-panel []
   [:div
