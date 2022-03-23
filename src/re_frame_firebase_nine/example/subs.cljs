@@ -16,7 +16,10 @@
    (re-frame/subscribe [::fb-reframe/on-value ["todos"]]))
  (fn [todos]
    (console :debug (str "::todos => " todos))
-   (reduce-kv (fn [m k v] (assoc m k (assoc v :id (name k)))) {} todos)))
+  ;;  (reduce-kv (fn [m k v] (assoc m k (assoc v :id k))) {} todos)
+   ;; important change: remove (name k)
+   (reduce-kv (fn [m k v] (assoc m k (assoc v :id (name k)))) {} todos)
+   ))
 
 (re-frame/reg-sub
  ::form-todo-map
@@ -25,3 +28,8 @@
    (println "SUBS form" todos)
    (re-frame/dispatch [::form-events/set-value! [:form :todo-map] todos])
    todos))
+
+(re-frame/reg-sub
+ ::new-todo-key
+ (fn [db]
+   (:current-todo-key db)))
