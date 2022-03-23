@@ -42,5 +42,5 @@
 
    [:h1 "Todos"]
    [:div
-    (doall (map todo-item @(re-frame/subscribe [::subs/form-todo-map])))]])
+    (doall (map todo-item (vals @(re-frame/subscribe [::subs/form-todo-map]))))]])
 

@@ -27,12 +27,21 @@
   {:db (assoc-in db path "")
    ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
                               :data  (get-in db path)
-                              :success #(.alert js/window "Saved")}}))
+                              :success (fn [] 
+                                        ;;  (.alert js/window "Saved")
+                                         (re-frame/dispatch [::save-todo-success]))}}))
 
 (re-frame/reg-event-db
  ::create-todo-success
  (fn-traced [db _]
             (let [_ (println "Created task with id:" (get-in db [:current-todo-key]))] db)))
+
+(re-frame/reg-event-db
+ ::save-todo-success
+ (fn-traced [db _]
+            (let [_ (println "Saved task")] 
+                  db)))
+
 
 (re-frame/reg-event-fx
  ::dispatch-later

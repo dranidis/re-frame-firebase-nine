@@ -7,6 +7,67 @@
             [re-frame-firebase-nine.example.forms.forms :refer [db-set-value!]]
             [re-frame-firebase-nine.emulator :refer [connect-fb-emulator-empty-db]]))
 
+
+(defn init-emul-db []
+  (connect-fb-emulator-empty-db)
+  (re-frame/dispatch-sync [::events/initialize-db]))
+
+(defn create-a-task
+  [task-string]
+  (db-set-value! [:form :todo] task-string)
+  (re-frame/dispatch [::events/create-todo [:form :todo]]))
+
+(deftest test-todo
+  (testing "save-read-todo"
+    (rf-test/run-test-async
+     (let [db (re-frame/subscribe [::subs/db])
+           _ (init-emul-db)
+           old-key (:current-todo-key @db)
+           task "Test task"
+           _ (create-a-task task)
+           tasks (re-frame/subscribe [::subs/todos])]
+       (rf-test/wait-for
+        [::events/create-todo-success]
+        (println "After create-todo-success")
+        (is (= nil old-key))
+        (is (= 1 (count (vals @tasks))))
+        (is (not (nil? (:current-todo-key @db))))
+        (is (= task (:todo (first (vals @tasks))))))))))
+
+(deftest test-todo-update
+  (testing "update-read-todo"
+    (rf-test/run-test-async
+     (let [db (re-frame/subscribe [::subs/db])
+           _ (init-emul-db)
+           _ (create-a-task "A task")
+           form-todo-map (re-frame/subscribe [::subs/form-todo-map])]
+       (rf-test/wait-for
+        [::events/create-todo-success]
+        (println "After create-todo-success")
+        ;; (println "DB" @db)
+        (println "form-todo-map" @form-todo-map)
+
+        (let [path [:form :todomap (keyword (:id (first (vals @form-todo-map))))]]
+          (println "PATH" path)
+          (println @db)
+          (db-set-value! (into path [:todo]) "new-string")
+          (db-set-value! (into path [:completed]) true)
+          (db-set-value! (into path [:id]) (:id (first (vals @form-todo-map))))
+          (println "DB" @db)
+          (re-frame/dispatch [::events/save-todo path])
+
+          (rf-test/wait-for [::events/save-todo-success]
+                            (println "After save-todo-success")
+                            (println "DB" @db)
+                            (println "form-todo-map" @form-todo-map)
+                            (is (= "new-string" (:todo (first (vals @form-todo-map)))))
+                            (is (= true (:completed (first (vals @form-todo-map))))))))))))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (re-frame/reg-event-fx
  ::event
  (fn [_]
@@ -52,45 +113,6 @@
     ;
   )
 
-
-
-
-(deftest test-todo
-  (testing "save-read-todo"
-    (rf-test/run-test-async
-     (let [db (re-frame/subscribe [::subs/db])
-           _ (connect-fb-emulator-empty-db)
-           _ (re-frame/dispatch-sync [::events/initialize-db])
-           old-key (:current-todo-key @db)
-           task "Test task"
-           _ (db-set-value! [:form :todo] task)
-           _ (re-frame/dispatch [::events/create-todo [:form :todo]])
-           tasks (re-frame/subscribe [::subs/todos])
-          ;;  _ (re-frame/dispatch [::events/dispatch-later])
-           ]
-
-       (rf-test/wait-for [::events/create-todo-success]
-                         (println "After create-todo-success")
-                         (let []
-                           (is (= 1 old-key))
-                           (is (= 1 (count (vals @tasks))))
-                           (is (not (nil? (:current-todo-key @db))))
-                           (is (= nil (:todo (first (vals @tasks))))))))))
-
-  (testing "create-upate-read-todo"
-    (rf-test/run-test-async
-     (let [_ (re-frame/subscribe [::subs/db])
-           _ (connect-fb-emulator-empty-db)
-           _ (re-frame/dispatch-sync [::events/initialize-db])
-           task "Test task"
-           _ (db-set-value! [:form :todo] task)
-           _ (re-frame/dispatch [::events/create-todo [:form :todo]])
-           tasks (re-frame/subscribe [::subs/todos])
-          ;;  _ (re-frame/dispatch [::events/dispatch-later])
-           ]
-       (rf-test/wait-for
-        [::events/create-todo-success]
-        (let []))))))
 
 
 

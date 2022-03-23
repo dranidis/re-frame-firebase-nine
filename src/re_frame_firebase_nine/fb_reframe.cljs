@@ -3,12 +3,12 @@
             [re-frame-firebase-nine.firebase-database :refer [set-value! default-set-success-callback default-set-error-callback on-value off push-value! update! connect-database-emulator get-db]]
             [reagent.ratom :as ratom]
             [re-frame.utils :refer [dissoc-in]]
-            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user on-auth-state-changed user-callback connect-auth-emulator get-auth]]
+            [re-frame-firebase-nine.firebase-auth :as firebase-auth :refer [error-callback sign-in sign-out create-user on-auth-state-changed connect-auth-emulator get-auth]]
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [clojure.spec.alpha :as spec]
             [clojure.test :refer [is]]
             [re-frame-firebase-nine.utils :refer [if-vector?->map]]
-            [clojure.string :as string]))
+            [re-frame.loggers :refer [console]]))
 
 
 (def connected-to-emalator? (atom false))
@@ -28,7 +28,8 @@
 ;; Data can be deleted by giving null as value
 (re-frame/reg-fx
  ::firebase-set
- (fn [{:keys [path data success error]}]
+ (fn [{:keys [path data success error] :as m}]
+   (console :debug (str "::firebase-set " m))
    (set-value! path
                data
                (if success success default-set-success-callback)
@@ -50,8 +51,8 @@
 ;; the key will be stored in the db at key-path
 (re-frame/reg-fx
  ::firebase-push
- (fn [{:keys [path data success error key-path]}]
-  ;;  (println "key-path" key-path)
+ (fn [{:keys [path data success error key-path] :as m}]
+   (console :debug (str "::firebase-push " m))
    (let [key (push-value! path
                           data
                           #(re-frame/dispatch [success])

@@ -13,7 +13,7 @@
 
 (defn db-set-value!
   [db-path value]
-  (re-frame/dispatch [::events/set-value! db-path value]))
+  (re-frame/dispatch-sync [::events/set-value! db-path value]))
 
 ;;
 ;; functions for generic form inputs
