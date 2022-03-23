@@ -27,7 +27,7 @@
   {:db (assoc-in db path "")
    ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
                               :data  (get-in db path)
-                              :success #(println "SAVED")}}))
+                              :success #(.alert js/window "Saved")}}))
 
 (re-frame/reg-event-db
  ::create-todo-success
