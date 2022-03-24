@@ -3,7 +3,8 @@
    [re-frame.core :as re-frame]
    [re-frame-firebase-nine.example.db :as db]
    [day8.re-frame.tracing :refer-macros [fn-traced]]
-   [re-frame-firebase-nine.fb-reframe :as fb-reframe]))
+   [re-frame-firebase-nine.fb-reframe :as fb-reframe]
+   [re-frame-firebase-nine.example.subs :as subs]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -13,55 +14,29 @@
 (re-frame/reg-event-fx
  ::create-todo
  (fn-traced
-  [{:keys [db]} [_ task]]
-  {
-   ::fb-reframe/firebase-push {:path ["todos"]
-                               :data task
+  [_ [_ todo]]
+  {::fb-reframe/firebase-push {:path ["todos"]
+                               :data todo
                                :success ::create-todo-success
-                               :key-path [:current-todo-key]}}))
-
-(re-frame/reg-event-fx
- ::save-todo
+                               :key-path [::subs/current-todo-key]}}))
+(re-frame/reg-event-db
+ ::create-todo-success
  (fn-traced
-  [{:keys [db]} [_ path]]
-  {:db (assoc-in db path "")
-   ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
-                              :data  (get-in db path)
-                              :success (fn []
-                                        ;;  (.alert js/window "Saved")
-                                         (re-frame/dispatch [::save-todo-success]))}}))
+  [db _]
+  (let [_ (println "Created task with id:" @(re-frame/subscribe [::subs/new-todo-key]))]
+    db)))
 
 (re-frame/reg-event-fx
  ::update-todo
  (fn-traced
-  [{:keys [db]} [_ path]]
-  {:db (assoc-in db path "")
-   ::fb-reframe/firebase-set {:path ["todos" (:id (get-in db path))]
-                              :data  (get-in db path)
+  [_ [_ todo]]
+  {::fb-reframe/firebase-set {:path ["todos" (name (:id todo))]
+                              :data  todo
                               :success (fn []
                                         ;;  (.alert js/window "Saved")
-                                         (re-frame/dispatch [::save-todo-success]))}}))
-
+                                         (re-frame/dispatch [::update-todo-success]))}}))
 (re-frame/reg-event-db
- ::create-todo-success
+ ::update-todo-success
  (fn-traced [db _]
-            (let [_ (println "Created task with id:" (get-in db [:current-todo-key]))] db)))
-
-(re-frame/reg-event-db
- ::save-todo-success
- (fn-traced [db _]
-            (let [_ (println "Saved task")] 
-                  db)))
-
-
-(re-frame/reg-event-fx
- ::dispatch-later
- (fn-traced
-  [_ [_ _]]
-  {:fx [[:dispatch-later {:ms 200 :dispatch [::later]}]]}))
-
-(re-frame/reg-event-db
- ::later
- (fn-traced [db _]
-            (println "LATER")
-            db))
+            (let [_ (println "Saved task")]
+              db)))

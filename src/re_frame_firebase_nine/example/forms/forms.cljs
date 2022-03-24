@@ -13,7 +13,7 @@
 
 (defn db-set-value!
   [db-path value]
-  (re-frame/dispatch-sync [::events/set-value! db-path value]))
+  (re-frame/dispatch [::events/set-value! db-path value]))
 
 ;;
 ;; functions for generic form inputs
@@ -25,16 +25,19 @@
 
 (defmethod dispatch :text [_ path value]
   (re-frame/dispatch [::events/set-value! path value])
-  (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true]))
+  ;; (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true])
+  )
 
 (defmethod dispatch :password [_ path value]
   (re-frame/dispatch [::events/set-value! path value])
-  (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true]))
+  ;; (re-frame/dispatch [::events/set-value! (into [:form-changed-value] path) true])
+  )
 
 
 (defmethod dispatch :checkbox [_ path _]
   (re-frame/dispatch [::events/update-value! path not])
-  (re-frame/dispatch [::events/update-value! (into [:form-changed-value] path) not]))
+  ;; (re-frame/dispatch [::events/update-value! (into [:form-changed-value] path) not])
+  )
 
 
 (defmulti input-element (fn [{:keys [type]}] type))
