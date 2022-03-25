@@ -129,7 +129,7 @@
                           (db-set-value! (into [:dropdown-search :visible] db-path) false)                 ;; hide the search text and select elements
                           (db-set-value! (into [:dropdown-search :search] db-path) "")                     ;; clear the search text
                           (db-set-value! (into [:dropdown-search :value] db-path) (-> e .-target .-value)) ;; change the selected value
-                          (db-set-value! db-path selected-id)))}                                           ;; change in db the id of the selected element
+                          (db-set-value! (into db-path) selected-id)))}                                           ;; change in db the id of the selected element
       [:option.option.bg-stone-800.text-neutral-200 {:value ""} select-nothing-text]
       (map (fn [m] [:option.option.bg-stone-800.text-neutral-200 {:key (id-keyword m) :id (id-keyword m) :value (display-keyword m)} (display-keyword m)])
            select-options)]]))

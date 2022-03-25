@@ -40,12 +40,15 @@
                            (db-set-value! form-path {}))} "Create"]]))
 
 (defn select-task
-  [options selected]
-  (let [form-path [:form :select-task]]
+  [options]
+  (let [form-path [:form :select-task]
+    ;; subscribe to the stored selected value and pass the form-path to set the
+    ;; initial value
+        selected @(re-frame/subscribe [::subs/selected form-path])]
     (println "SELECTED" selected)
-    (db-set-value! form-path selected)
     [:div
      [:h1 "Select a task"]
+     [:div "Selected: " selected]
      (dropdown-search {:db-path (into form-path)
                        :options (if-nil?->value options [])
                        :id-keyword :id
@@ -65,6 +68,5 @@
    [:div
     (doall (map update-item (vals @(re-frame/subscribe [::subs/todos]))))]
    [select-task
-    (vals @(re-frame/subscribe [::subs/todos]))
-    @(re-frame/subscribe [::subs/selected])]])
+    (vals @(re-frame/subscribe [::subs/todos]))]])
 

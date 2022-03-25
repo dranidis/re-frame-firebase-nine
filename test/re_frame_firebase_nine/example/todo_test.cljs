@@ -4,7 +4,6 @@
             [re-frame-firebase-nine.example.subs :as subs]
             [re-frame-firebase-nine.example.events :as events]
             [re-frame.core :as re-frame]
-            [re-frame-firebase-nine.example.forms.forms :refer [db-set-value!]]
             [re-frame-firebase-nine.emulator :refer [connect-fb-emulator-empty-db]]))
 
 
