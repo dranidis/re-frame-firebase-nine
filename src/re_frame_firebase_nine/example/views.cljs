@@ -3,15 +3,14 @@
    [re-frame.core :as re-frame]
    [re-frame-firebase-nine.example.subs :as subs]
    [re-frame-firebase-nine.example.events :as events]
-   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search]]
+   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search bind-form-to-sub! bind-form-to-value!]]
    [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]
    [re-frame-firebase-nine.example.forms.utils :refer [if-nil?->value]]))
 
 
 (defn update-item [todo]
   (let [id (:id todo)
-        form-path [:form :edit-todo id]]
-    (db-set-value! form-path todo)
+        form-path (bind-form-to-value! todo [:form :edit-todo id])]
     [:div {:key (random-uuid)}
      [input-element {:class ""
                      :type :checkbox
@@ -27,8 +26,7 @@
 
 (defn create-item
   []
-  (let [form-path [:form :create-todo]]
-    (db-set-value! form-path {})
+  (let [form-path (bind-form-to-value! {} [:form :create-todo])]
     [:div
      [:h1 "New todo item"]
      [input-element {:class ""
@@ -40,17 +38,12 @@
                            (db-set-value! form-path {}))} "Create"]]))
 
 (defn select-task
-  [options]
-  (let [form-path [:form :select-task]
-    ;; subscribe to the stored selected value and pass the form-path to set the
-    ;; initial value
-        selected @(re-frame/subscribe [::subs/selected form-path])]
-    (println "SELECTED" selected)
+  []
+  (let [form-path (bind-form-to-sub! ::subs/selected [:form :select-task])]
     [:div
      [:h1 "Select a task"]
-     [:div "Selected: " selected]
      (dropdown-search {:db-path (into form-path)
-                       :options (if-nil?->value options [])
+                       :options (if-nil?->value (vals @(re-frame/subscribe [::subs/todos])) [])
                        :id-keyword :id
                        :display-keyword :todo
                        :button-text-empty "Click to select a game"
@@ -67,6 +60,5 @@
    [:h1 "Todos"]
    [:div
     (doall (map update-item (vals @(re-frame/subscribe [::subs/todos]))))]
-   [select-task
-    (vals @(re-frame/subscribe [::subs/todos]))]])
+   [select-task]])
 
