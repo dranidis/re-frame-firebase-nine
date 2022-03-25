@@ -14,3 +14,10 @@
  ::new-todo-key
  (fn [db]
    (::current-todo-key db)))
+
+(re-frame/reg-sub
+ ::selected
+ (fn []
+   (re-frame/subscribe [::fb-reframe/on-value ["selected"]]))
+ (fn [selected]
+   selected))

@@ -3,8 +3,9 @@
    [re-frame.core :as re-frame]
    [re-frame-firebase-nine.example.subs :as subs]
    [re-frame-firebase-nine.example.events :as events]
-   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value!]]
-   [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]))
+   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search]]
+   [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]
+   [re-frame-firebase-nine.example.forms.utils :refer [if-nil?->value]]))
 
 
 (defn update-item [todo]
@@ -38,11 +39,32 @@
                            (re-frame/dispatch [::events/create-todo @(db-get-ref form-path)])
                            (db-set-value! form-path {}))} "Create"]]))
 
+(defn select-task
+  [options selected]
+  (let [form-path [:form :select-task]]
+    (println "SELECTED" selected)
+    (db-set-value! form-path selected)
+    [:div
+     [:h1 "Select a task"]
+     (dropdown-search {:db-path (into form-path)
+                       :options (if-nil?->value options [])
+                       :id-keyword :id
+                       :display-keyword :todo
+                       :button-text-empty "Click to select a game"
+                       :input-placeholder "Type to find a game"
+                       :select-nothing-text "(no selection)"
+                       :sort? true
+                       :style {:width "300px"}})
+     [:button {:on-click (fn [_]
+                           (re-frame/dispatch [::events/save-selected @(db-get-ref form-path)]))} "Save"]]))
 (defn main-panel []
   [:div
    [:h1 "Current user email:" (get-current-user-email)]
    [create-item]
    [:h1 "Todos"]
    [:div
-    (doall (map update-item (vals @(re-frame/subscribe [::subs/todos]))))]])
+    (doall (map update-item (vals @(re-frame/subscribe [::subs/todos]))))]
+   [select-task
+    (vals @(re-frame/subscribe [::subs/todos]))
+    @(re-frame/subscribe [::subs/selected])]])
 

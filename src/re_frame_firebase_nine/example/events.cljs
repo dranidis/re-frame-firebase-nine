@@ -40,3 +40,19 @@
  (fn-traced [db _]
             (let [_ (println "Saved task")]
               db)))
+
+(re-frame/reg-event-fx
+ ::save-selected
+ (fn-traced
+  [_ [_ todo]]
+  {::fb-reframe/firebase-set {:path ["selected"]
+                              :data  todo
+                              :success (fn []
+                                        ;;  (.alert js/window "Saved")
+                                         (re-frame/dispatch [::save-selected-success]))}}))
+
+(re-frame/reg-event-db
+ ::save-selected-success
+ (fn-traced [db _]
+            (let [_ (println "Saved selected")]
+              db)))
