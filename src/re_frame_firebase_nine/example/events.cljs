@@ -42,6 +42,21 @@
               db)))
 
 (re-frame/reg-event-fx
+ ::delete-todo
+ (fn-traced
+  [_ [_ todo]]
+  {::fb-reframe/firebase-set {:path ["todos" (name (:id todo))]
+                              :data  nil
+                              :success (fn []
+                                        ;;  (.alert js/window "Saved")
+                                         (re-frame/dispatch [::delete-todo-success]))}}))
+(re-frame/reg-event-db
+ ::delete-todo-success
+ (fn-traced [db _]
+            (let [_ (println "Deleted task")]
+              db)))
+
+(re-frame/reg-event-fx
  ::save-selected
  (fn-traced
   [_ [_ todo]]

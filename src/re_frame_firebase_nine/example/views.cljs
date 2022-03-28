@@ -3,7 +3,8 @@
    [re-frame.core :as re-frame]
    [re-frame-firebase-nine.example.subs :as subs]
    [re-frame-firebase-nine.example.events :as events]
-   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search bind-form-to-sub! bind-form-to-value!]]
+   [re-frame-firebase-nine.example.forms.bind :refer [bind-form-to-value! bind-form-to-value! bind-form-to-sub!]]
+   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search]]
    [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]
    [re-frame-firebase-nine.example.forms.utils :refer [if-nil?->value]]))
 
@@ -22,7 +23,10 @@
                      :path (into form-path [:todo])}]
      [:button {:on-click #(re-frame/dispatch [::events/update-todo @(db-get-ref form-path)])
               ;;  :disabled (not @(re-frame/subscribe [::form-subs/changed-value form-path]))
-               }"Save"]]))
+               }"Update"]
+     [:button {:on-click #(re-frame/dispatch [::events/delete-todo @(db-get-ref form-path)])
+              ;;  :disabled (not @(re-frame/subscribe [::form-subs/changed-value form-path]))
+               }"Delete"]]))
 
 (defn create-item
   []

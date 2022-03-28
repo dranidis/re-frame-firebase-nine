@@ -4,8 +4,7 @@
             [clojure.test :refer [is]]
             [re-frame-firebase-nine.example.forms.subs :as subs]
             [re-frame-firebase-nine.example.forms.events :as events]
-            [re-frame-firebase-nine.example.forms.utils :refer [find-key-value-in-map-list if-nil?->value]]
-            [clojure.string :as string]))
+            [re-frame-firebase-nine.example.forms.utils :refer [find-key-value-in-map-list if-nil?->value]]))
 
 
 (defn db-get-ref
@@ -157,34 +156,4 @@
       (map (fn [m] [:option.option.bg-stone-800.text-neutral-200 {:key (id-keyword m) :id (id-keyword m) :value (display-keyword m)} (display-keyword m)])
            select-options)]]))
 
-
-
-(defn bind-form-to-sub!
-  "Creates a new re-frame subscription with a unique key
-   that subscribes to `from-sub` with a handler that
-   dispatches a db write event of the value to the `db-path` list of keywords.
-   It then subscribes to `new-subscription`.
-   The key of the subscription is string combining the from-sub keyword and the members of the db-path list."
-  [from-sub db-path]
-  ;; create a subscription with a dispatch side-effect
-  (let [new-subscription (keyword (str (namespace from-sub) \. (name from-sub) "->" (string/join "." (map name db-path))))]
-    (re-frame/reg-sub
-     new-subscription
-     (fn []
-       (re-frame/subscribe [from-sub]))
-     (fn [value]
-   ;; changing of the form-path should happer here so that it happens only once
-   ;; and not when component rerenders due to drop-down changing the dom
-   ;; and causing rerender which resets the value to the one read from 
-   ;; the subscription.
-       (db-set-value! db-path value)
-       value))
-  ;; subscribe to the subscription and return its ref
-    @(re-frame/subscribe [new-subscription])
-    db-path))
-
-(defn bind-form-to-value!
-  [value db-path]
-  (db-set-value! db-path value)
-  db-path)
 
