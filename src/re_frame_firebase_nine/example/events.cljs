@@ -1,10 +1,10 @@
 (ns re-frame-firebase-nine.example.events
-  (:require
-   [re-frame.core :as re-frame]
-   [re-frame-firebase-nine.example.db :as db]
-   [day8.re-frame.tracing :refer-macros [fn-traced]]
-   [re-frame-firebase-nine.fb-reframe :as fb-reframe]
-   [re-frame-firebase-nine.example.subs :as subs]))
+  (:require [day8.re-frame.tracing :refer-macros [fn-traced]]
+            [re-frame-firebase-nine.example.db :as db]
+            [re-frame-firebase-nine.example.subs :as subs]
+            [re-frame-firebase-nine.fb-reframe :as fb-reframe]
+            [re-frame.core :as re-frame]
+            [re-frame.loggers :refer [console]]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -17,13 +17,15 @@
   [_ [_ todo]]
   {::fb-reframe/firebase-push {:path ["todos"]
                                :data todo
-                               :success ::create-todo-success
+                               :success #(re-frame/dispatch [::create-todo-success todo])
+                               :error #(console :debug "ERROR Creating")
                                :key-path [::subs/current-todo-key]}}))
 (re-frame/reg-event-db
  ::create-todo-success
  (fn-traced
-  [db _]
-  (let [_ (println "Created task with id:" @(re-frame/subscribe [::subs/new-todo-key]))]
+  [db [_ todo]]
+  (let [_ (println "Created task with id:" @(re-frame/subscribe [::subs/new-todo-key]) 
+                   " and data: " todo)]
     db)))
 
 (re-frame/reg-event-fx

@@ -43,15 +43,15 @@
 
 (defn select-task
   []
-  (let [form-path (bind-form-to-sub! ::subs/selected [:form :select-task])]
+  (let [form-path (bind-form-to-sub! [::subs/selected] [:form :select-task])]
     [:div
      [:h1 "Select a task"]
      (dropdown-search {:db-path (into form-path)
                        :options (if-nil?->value (vals @(re-frame/subscribe [::subs/todos])) [])
                        :id-keyword :id
                        :display-keyword :todo
-                       :button-text-empty "Click to select a game"
-                       :input-placeholder "Type to find a game"
+                       :button-text-empty "Click to select a task"
+                       :input-placeholder "Type to find a task"
                        :select-nothing-text "(no selection)"
                        :sort? true
                        :style {:width "300px"}})

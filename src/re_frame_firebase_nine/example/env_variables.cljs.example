@@ -1,0 +1,4 @@
+(ns re-frame-firebase-nine.example.env-variables)
+
+;; Firebase API key
+(def api-key-env "<Firebase API KEY>")

@@ -1,8 +1,9 @@
-(ns re-frame-firebase-nine.example.fb-config)
+(ns re-frame-firebase-nine.example.fb-config 
+  (:require [re-frame-firebase-nine.example.env-variables :refer [api-key-env]]))
 
 (defn get-config
   []
-  {:apiKey "AIzaSyBBbED8EWbMEDYxkeinMRqNXyb9Vr18C9A",
+  {:apiKey api-key-env,
    :authDomain "re-frame-firebase-nine-example.firebaseapp.com",
    :databaseURL "https://re-frame-firebase-nine-example-default-rtdb.europe-west1.firebasedatabase.app",
    :projectId "re-frame-firebase-nine-example",

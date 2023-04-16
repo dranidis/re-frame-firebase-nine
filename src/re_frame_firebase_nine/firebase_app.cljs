@@ -24,13 +24,3 @@
    (reset! firebase-app (fb/initializeApp (clj->js firebase-config)))
    @firebase-app))
 
-
-(comment
-
-  (init-app {:apiKey "AIzaSyCpMjjOO9t-TVrzJ-seEy-4MUnH9PWc-uc",
-             :authDomain "test-firebase-refr.firebaseapp.com",
-             :databaseURL "https://test-firebase-refr-default-rtdb.europe-west1.firebasedatabase.app",
-             :projectId "test-firebase-refr",
-             :appId "1:1052651152055:web:4971b846529e25aa0ba332"})
-  ;
-  )

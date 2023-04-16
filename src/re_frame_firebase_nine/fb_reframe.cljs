@@ -55,10 +55,8 @@
    (console :debug (str "::firebase-push " m))
    (let [key (push-value! path
                           data
-                          #(re-frame/dispatch [success])
-                          (if error
-                            #(re-frame/dispatch [error %])
-                            error-callback))]
+                          (if success success default-set-success-callback)
+                          (if error error default-set-error-callback))]
      (re-frame/dispatch [::write-to-db key-path key]))))
 
 (re-frame/reg-event-db

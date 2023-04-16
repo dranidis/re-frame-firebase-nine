@@ -1,6 +1,7 @@
 (ns re-frame-firebase-nine.firebase-database
   (:require ["firebase/database" :as fdb]
             [clojure.string :as string]
+            [re-frame-firebase-nine.firebase-app :as firebase-app]
             [re-frame.loggers :refer [console]]))
 
 ;; (defn- get-db
@@ -91,4 +92,16 @@
   [error]
   (console :error (js->clj error)))
 
+
+(comment
+
+  ;;
+;; Initialize firebase app once and store the app in the atom
+;;
+  (defonce firebase-connected (atom nil))
+  (defn set-connectecd [v]
+    (console :debug (str "Connected: " v))
+    (reset! firebase-connected v))
+  (on-value [".info/connected"] set-connectecd)
+  @firebase-connected)
 
