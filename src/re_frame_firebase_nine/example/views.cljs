@@ -16,7 +16,8 @@
      [input-element {:class ""
                      :type :checkbox
                      :placeholder "Completed"
-                     :path (into form-path [:completed])}]
+                     :path (into form-path [:completed])
+                     :post-fn #(re-frame/dispatch [::events/update-todo @(db-get-ref form-path)])}]
      [input-element {:class ""
                      :type :text
                      :placeholder "I have to do ..."

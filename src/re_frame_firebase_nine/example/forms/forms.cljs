@@ -67,7 +67,9 @@
   (let [post-fn (if-nil?->value post-fn identity)
         checked @(db-get-ref path)]
     [:input {:type (name type) :checked (if (nil? checked) false checked)
-             :on-change #(dispatch type path (post-fn (-> % .-target .-value)))}]))
+             :on-change (fn [_]
+                          (re-frame/dispatch-sync [::events/update-value! path not])
+                          (post-fn))}]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn string-list->map-list
