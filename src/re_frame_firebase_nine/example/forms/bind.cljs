@@ -22,7 +22,8 @@
     (if (@bind-sub-register new-subscription) ;; is member?
       db-path
       (let [_ (swap! bind-sub-register #(conj % new-subscription)) ;; add to register
-            _ (print "NEW SUB" new-subscription)]
+            ;; _ (print "NEW SUB" new-subscription)
+            ]
         (re-frame/reg-sub
          new-subscription
          (fn []
@@ -40,7 +41,6 @@
 
 (defn bind-form-to-value!
   [value db-path]
-  (println "SUB-VAL" value db-path)
   (db-set-value! db-path value)
   db-path)
 

@@ -7,8 +7,7 @@
             [re-frame-firebase-nine.firebase-app :refer [init-app]]
             [clojure.spec.alpha :as spec]
             [clojure.test :refer [is]]
-            [re-frame-firebase-nine.utils :refer [if-vector?->map]]
-            [re-frame.loggers :refer [console]]))
+            [re-frame-firebase-nine.utils :refer [if-vector?->map]]))
 
 
 (def connected-to-emalator? (atom false))
@@ -28,8 +27,7 @@
 ;; Data can be deleted by giving null as value
 (re-frame/reg-fx
  ::firebase-set
- (fn [{:keys [path data success error] :as m}]
-   (console :debug (str "::firebase-set " m))
+ (fn [{:keys [path data success error]}]
    (set-value! path
                data
                (if success success default-set-success-callback)
@@ -51,8 +49,7 @@
 ;; the key will be stored in the db at key-path
 (re-frame/reg-fx
  ::firebase-push
- (fn [{:keys [path data success error key-path] :as m}]
-   (console :debug (str "::firebase-push " m))
+ (fn [{:keys [path data success error key-path]}]
    (let [key (push-value! path
                           data
                           (if success success default-set-success-callback)

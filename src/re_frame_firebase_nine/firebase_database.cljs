@@ -1,7 +1,6 @@
 (ns re-frame-firebase-nine.firebase-database
   (:require ["firebase/database" :as fdb]
             [clojure.string :as string]
-            [re-frame-firebase-nine.firebase-app :as firebase-app]
             [re-frame.loggers :refer [console]]))
 
 ;; (defn- get-db
