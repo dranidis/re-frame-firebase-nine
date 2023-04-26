@@ -1,12 +1,15 @@
 (ns re-frame-firebase-nine.example.views
-  (:require
-   [re-frame.core :as re-frame]
-   [re-frame-firebase-nine.example.subs :as subs]
-   [re-frame-firebase-nine.example.events :as events]
-   [re-frame-firebase-nine.example.forms.bind :refer [bind-form-to-value! bind-form-to-value! bind-form-to-sub!]]
-   [re-frame-firebase-nine.example.forms.forms :refer [input-element db-get-ref db-set-value! dropdown-search]]
-   [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]
-   [re-frame-firebase-nine.example.forms.utils :refer [if-nil?->value]]))
+  (:require [re-frame-firebase-nine.example.events :as events]
+            [re-frame-firebase-nine.example.forms.bind :refer [bind-form-to-sub!
+                                                               bind-form-to-value! bind-form-to-value!]]
+            [re-frame-firebase-nine.example.forms.forms :refer [db-get-ref
+                                                                db-set-value!
+                                                                dropdown-search input-element]]
+            [re-frame-firebase-nine.example.forms.utils :refer [if-nil?->value]]
+            [re-frame-firebase-nine.example.modal.modal :as modal]
+            [re-frame-firebase-nine.example.subs :as subs]
+            [re-frame-firebase-nine.fb-reframe :refer [get-current-user-email]]
+            [re-frame.core :as re-frame]))
 
 
 (defn update-item [todo]
@@ -27,7 +30,12 @@
                }"Update"]
      [:button {:on-click #(re-frame/dispatch [::events/delete-todo @(db-get-ref form-path)])
               ;;  :disabled (not @(re-frame/subscribe [::form-subs/changed-value form-path]))
-               }"Delete"]]))
+               }"Delete"]
+     [:button
+      {:title "Click to show modal!"
+       :on-click #(re-frame/dispatch [:modal-event {:show? true
+                                     :child [modal/hello]
+                                     :size :small}])} "Show me the modal!"]]))
 
 (defn create-item
   []
@@ -60,6 +68,7 @@
                            (re-frame/dispatch [::events/save-selected @(db-get-ref form-path)]))} "Save"]]))
 (defn main-panel []
   [:div
+   [modal/modal]
    [:h1 "Current user email:" (get-current-user-email)]
    [create-item]
    [:h1 "Todos"]

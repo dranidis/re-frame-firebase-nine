@@ -6,6 +6,7 @@
    [re-frame-firebase-nine.example.views :as views]
    [re-frame-firebase-nine.example.config :as config]
    [re-frame-firebase-nine.example.fb-config :refer [get-config]]
+   [re-frame-firebase-nine.example.subs]
    [re-frame-firebase-nine.fb-reframe :refer [fb-reframe-config connect-emulator]]))
 
 

@@ -3,7 +3,7 @@
             [re-frame-firebase-nine.example.db :as db]
             [re-frame-firebase-nine.example.subs :as subs]
             [re-frame-firebase-nine.fb-reframe :as fb-reframe]
-            [re-frame.core :as re-frame]
+            [re-frame.core :as re-frame :refer [reg-event-db]]
             [re-frame.loggers :refer [console]]))
 
 (re-frame/reg-event-db
@@ -73,3 +73,10 @@
  (fn-traced [db _]
             (let [_ (println "Saved selected")]
               db)))
+
+
+
+(reg-event-db
+ :modal-event
+ (fn [db [_ data]]
+   (assoc-in db [:modal] data)))

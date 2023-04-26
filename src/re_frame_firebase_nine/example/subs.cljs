@@ -1,7 +1,8 @@
 (ns re-frame-firebase-nine.example.subs
-  (:require
-   [re-frame.core :as re-frame]
-   [re-frame-firebase-nine.fb-reframe :as fb-reframe]))
+  (:require [day8.re-frame-10x.inlined-deps.re-frame.v1v1v2.re-frame.core :refer [reg-sub-raw]]
+            [re-frame-firebase-nine.fb-reframe :as fb-reframe]
+            [re-frame.core :as re-frame]
+            [reagent.ratom :refer [reaction]]))
 
 (re-frame/reg-sub
  ::todos
@@ -22,3 +23,8 @@
  (fn [selected]
    selected))
 
+
+
+(reg-sub-raw
+ ::modal
+ (fn [db _] (reaction (:modal @db))))
