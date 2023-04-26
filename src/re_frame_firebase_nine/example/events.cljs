@@ -78,5 +78,5 @@
 
 (reg-event-db
  :modal-event
- (fn [db [_ data]]
+ (fn-traced [db [_ data]]
    (assoc-in db [:modal] data)))

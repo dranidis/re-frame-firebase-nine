@@ -25,6 +25,6 @@
 
 
 
-(reg-sub-raw
+(re-frame/reg-sub-raw
  ::modal
  (fn [db _] (reaction (:modal @db))))

@@ -35,7 +35,12 @@
       {:title "Click to show modal!"
        :on-click #(re-frame/dispatch [:modal-event {:show? true
                                      :child [modal/hello]
-                                     :size :small}])} "Show me the modal!"]]))
+                                     :size :small}])} "Show me the modal!"]
+     [:button
+      {:title "Click to show modal!"
+       :on-click #(re-frame/dispatch [:modal-event {:show? true
+                                                    :child [modal/hello-bootstrap]
+                                                    :size :small}])} "Show me the modal!"]]))
 
 (defn create-item
   []
@@ -68,7 +73,7 @@
                            (re-frame/dispatch [::events/save-selected @(db-get-ref form-path)]))} "Save"]]))
 (defn main-panel []
   [:div
-   [modal/modal]
+  ;;  [modal/modal]
    [:h1 "Current user email:" (get-current-user-email)]
    [create-item]
    [:h1 "Todos"]
